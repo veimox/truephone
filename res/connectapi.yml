@@ -1,0 +1,1984 @@
+openapi: 3.0.1
+info:
+  title: Truphone Connect API
+  description: Truphone\'s connectivity API to manage order, activation, and management of SIMs and subscribers
+  version: 2.0
+tags:
+
+  - name: Product Catalogue [v1]
+    description: Browse the catalogue of products available for purchase
+
+  - name: Order Management [v1]
+    description: View and Create new SIM or subscription orders
+
+  - name: SIM Card Management [v1]
+    description: View and manage active SIM cards/profiles
+
+  - name: Subscription Management [v1]
+    description: View and manage purchased subscriptions
+
+  - name: Product Catalogue
+    description: Browse the catalogue of products available for purchase
+
+  - name: Order Management
+    description: View and Create new SIM or subscription orders
+
+  - name: SIM Card Management
+    description: View and manage active SIM cards/profiles
+
+  - name: Subscription Management
+    description: View and manage purchased subscriptions
+
+x-tagGroups:
+
+  - name: Connect v2
+    tags:
+      - Product Catalogue
+      - Order Management
+      - SIM Card Management
+      - Subscription Management
+
+  - name: Connect v1
+    tags:
+      - Product Catalogue [v1]
+      - Order Management [v1]
+      - SIM Card Management [v1]
+      - Subscription Management [v1]
+
+
+paths:
+
+  # Product Catalogue
+
+  ## V1
+
+  /v1/products:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+    get:
+      tags:
+        - Product Catalogue [v1]
+      summary: Get products list
+      description: Retrieve the list of available products
+      operationId: getProductList
+      parameters:
+        - name: plan_id
+          in: query
+          description: Catalogue identifier (Used for partners with multiple catalogues)
+          schema:
+            type: string
+      responses:
+        200:
+          description: Product list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Product'
+
+  /v1/products/{product-id}:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+    get:
+      tags:
+        - Product Catalogue [v1]
+      summary: Get product details
+      description: Retrieve a specific product's details
+      operationId: getProductDetails
+      parameters:
+        - name: product-id
+          in: path
+          description: The product identifier
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+  ## V2
+
+  /v2/products:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+    get:
+      tags:
+        - Product Catalogue
+      summary: Get products list
+      description: Retrieve the list of available products
+      operationId: getProductListV2
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSizev2'
+
+      responses:
+        '200':
+          description: Products list retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ProductListItemV2'
+              example:
+                data:
+                  - id: "wp-_bXkuC26SFDSRMHyiAQK7LJ6MtiWyr3zLfwB7FM="
+                    name: "Plan name"
+                    duration: 90
+                    data: 50
+                    data_unit: MB
+                    price: 20
+                    price_currency: EUR
+                    footprint_code: GLOBAL
+
+                    sim_type:
+                      - PSIM
+                    _metadata:
+                      links:
+                        _self: "/v2/products/wp-_bXkuC26SFDSRMHyiAQK7LJ6MtiWyr3zLfwB7FM="
+                _metadata:
+                  page: 1
+                  page_size: 10
+                  page_count: 1
+                  links:
+                    self: "/v2/products?page=1&page_size=10"
+
+  /v2/products/{product-id}:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+    get:
+      tags:
+        - Product Catalogue
+      summary: Get product details
+      description: Retrieve a specific product's details
+      operationId: getProductDetailsV2
+      parameters:
+        - name: product-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDetailsV2'
+              example:
+                id: "wp-_bXkuC26SFDSRMHyiAQK7LJ6MtiWyr3zLfwB7FM="
+                name: "Plan name"
+                duration: 90
+                data: 50
+                data_unit: MB
+                footprint:
+                  - PT
+                  - GB
+                  - US
+                  - ES
+                footprint_code: GLOBAL
+                sim_type:
+                  - PSIM
+                price: 20
+                price_currency: EUR
+                _metadata:
+                  links:
+                    _self: "/v2/products/wp-_bXkuC26SFDSRMHyiAQK7LJ6MtiWyr3zLfwB7FM="
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+
+  # Order Management
+
+  ## V1
+
+  /v1/orders:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+
+    get:
+      tags:
+        - Order Management [v1]
+      summary: Get orders list
+      description: Retrieves a list of orders submitted by the customer
+      operationId: listOrder
+      parameters:
+        - name: status
+          in: query
+          description: The order status that we wish to filter by
+          required: true
+          schema:
+            type: string
+            example: COMPLETED
+        - name: start_date
+          in: query
+          description: Will only return orders created after this date
+          required: true
+          schema:
+            type: string
+            format: date-time
+            example: '2020-04-27T00:00:00.002Z'
+        - name: end_date
+          in: query
+          description: Will only return orders created before this date
+          required: true
+          schema:
+            type: string
+            format: date-time
+            example: '2020-04-27T00:00:00.002Z'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        200:
+          description: Returned list of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Order'
+              example:
+                data:
+                  - id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                    status: 'ACCEPTED'
+                    _metadata:
+                      links:
+                        _self: "/v2/orders/6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                  - id: "60e4e720-3504-4e44-8924-19916ae88ecb"
+                    status: 'COMPLETED'
+                    _metadata:
+                      links:
+                        _self: "/v2/orders/60e4e720-3504-4e44-8924-19916ae88ecb"
+                _metadata:
+                  page: 1
+                  page_size: 2
+                  page_count: 2
+                  links:
+                    self: "/v2/orders?page=1&page_size=2"
+
+    post:
+      tags:
+        - Order Management [v1]
+      summary: Create order
+      description: Submit a new SIM card/subscription order
+      operationId: createOrder
+      requestBody:
+        description: Order details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                -input
+              properties:
+                input:
+                  description: The input object that contains the parameters to create the order
+                  type: object
+                  required:
+                    - operation_type
+                    - country_code
+                  properties:
+                    operationType:
+                      description: The type of order to be created
+                      type: string
+                      enum:
+                        - NEW_ESIM
+                        - TOPUP
+                    countryCode:
+                      description: Country where the order is being placed
+                      type: string
+                      format: ISO2 Country Code
+                    customer:
+                      description: Basic information on the subscriber
+                      type: object
+                      required:
+                        - email
+                      properties:
+                        email:
+                          description: Subscriber's email address
+                          type: string
+                          format: email
+                        firstName:
+                          description: Subscriber's first name
+                          type: string
+                        lastName:
+                          description: Subscriber's last name
+                          type: string
+                    device:
+                      description: Device where the subscription will be installed
+                      type: object
+                      required:
+                        - id
+                        - type
+                      properties:
+                        id:
+                          description: Identifies the device on the customer end
+                          type: string
+                        type:
+                          description: Device type (Operating System)
+                          type: string
+                          enum:
+                            - ios
+                            - android
+                        eid:
+                          description: eUICC identifier, used for push install
+                          type: string
+                          format: eid
+                        model:
+                          description: Device Model
+                          type: string
+                        make:
+                          description: Device Manufacturer
+                          type: string
+                    esim:
+                      description: Identifies the SIM profile to be installed on the device
+                      type: object
+                      properties:
+                        iccid:
+                          description: SIM profile identifier
+                          type: string
+                          format: iccid
+                    subscriptions:
+                      description: List of products to add to the SIM card
+                      type: array
+                      items:
+                        type: object
+                        required:
+                          - product_id
+                        properties:
+                          product_id:
+                            description: Id of the product to purchase (Get from Catalogue)
+                            type: string
+                          activationDate:
+                            description: Date when the product should activate (Defaults to now())
+                            type: string
+                          price:
+                            description: Price at which the product was sold including local VAT
+                            type: number
+                          currency:
+                            description: Currency in which the product was sold to the end customer
+                            type: string
+                            format: ISO3 Currency Format
+
+            examples:
+              NEW_ESIM:
+                summary: New eSIM + Data product
+                value:
+                  input:
+                    operationType: NEW_ESIM
+                    countryCode: PT
+                    customer:
+                      email: "john@doe.com"
+                    device:
+                      id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                      type: ios
+                    subscriptions:
+                      - productId: "SaLjq5bqP8rsY5k8VVQtFs_punENj1R8ima-M3DQTjg="
+                        price: 10.99
+                        currency: "USD"
+              NEW_ESIM_PUSH_INSTALL:
+                summary: New eSIM + Data product + Push Install
+                value:
+                  input:
+                    operationType: NEW_ESIM
+                    countryCode: PT
+                    customer:
+                      email: "john@doe.com"
+                    device:
+                      id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                      eid: '89049032004008882600019002594762'
+                      type: ios
+                    subscriptions:
+                      - productId: "SaLjq5bqP8rsY5k8VVQtFs_punENj1R8ima-M3DQTjg="
+              TOPUP:
+                summary: Topup eSIM
+                value:
+                  input:
+                    operationType: TOPUP
+                    countryCode: PT
+                    device:
+                      id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                      type: ios
+                    esim:
+                      iccid: '8944000013283712983321'
+                    subscriptions:
+                      - productId: "SaLjq5bqP8rsY5k8VVQtFs_punENj1R8ima-M3DQTjg="
+      responses:
+        201:
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              example:
+                id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                status: 'ACCEPTED'
+
+  /v1/orders/{order-id}:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+
+    get:
+      tags:
+        - Order Management [v1]
+      summary: Get order details
+      description: Retrive a specific order's details
+      operationId: getOrderDetails
+      parameters:
+        - name: order-id
+          in: path
+          description: The order id provided after it was created
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Order retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              examples:
+                COMPLETED:
+                  summary: Completed
+                  value:
+                    id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                    status: "COMPLETED"
+                    output:
+                      iccid: "8944000013283712983321"
+                      matchingId: "6C-DA326D-K86D"
+                      subscription_id: "Q-hzHc6EErZPQcgw2L02_nDdruGtr6lDrM-jmja_xuE="
+                      smdpUrl: "rsp.truphone.com"
+                      lpa_url: "1$rsp.truphone.com$6C-DA326D-K86D"
+                      qrcode_url: "https://services.truphone.com/connect/qrcode/v1/esim/LPA:1$rsp.truphone.com$FDSAA-ASD"
+                ACCEPTED:
+                  summary: Accepted (Not in progress yet)
+                  value:
+                    id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                    status: "ACCEPTED"
+                FULFILLING:
+                  summary: Fulfilling (In progress)
+                  value:
+                    id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                    status: "FULFILLING"
+                FAILED:
+                  summary: Failed
+                  value:
+                    id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                    status: "FAILED"
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+  ## V2
+
+  /v2/orders:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+
+    get:
+      tags:
+        - Order Management
+      summary: Get the list of orders
+      description: Retrieves the list of orders submitted by the customer
+      operationId: listOrdersV2
+      parameters:
+        - name: status
+          in: query
+          description: The order status that we wish to filter by
+          required: false
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          description: Will only return orders created after this date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: end_date
+          in: query
+          description: Will only return orders created before this date
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - $ref: '#/components/parameters/PageSizev2'
+        - $ref: '#/components/parameters/Page'
+      responses:
+        200:
+          description: Returned list of orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/OrderListItemV2'
+              example:
+                data:
+                  - id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                    status: 'ACCEPTED'
+                    created_date: "2020-12-03T00:04:57Z"
+                    output:
+                      matching_id: "8944110013283712983321"
+                      iccid: "6C-DA326D-K86D"
+                      subscription_id: "Q-h3123c6EErZPQcgw2L02_nDdruGtr6lDrM-jmja_xuE="
+                  - id: "60e4e720-3504-4e44-8924-19916ae88ecb"
+                    status: 'COMPLETED'
+                    created_date: "2020-12-03T00:04:57Z"
+                    output:
+                      matching_id: "8944000013283712983321"
+                      iccid: "6C-DA326D-K86D"
+                      subscription_id: "Q-hzHc6EErZPQcgw2L02_nDdruGtr6lDrM-jmja_xuE="
+                _metadata:
+                  page: 1
+                  page_size: 2
+                  page_count: 2
+                  links:
+                    _self: "/v2/orders?page=1&page_size=2"
+                    _next: "/v2/orders?page=2&page_size=2"
+
+    post:
+      tags:
+        - Order Management
+      summary: Create a new order
+      description: Submit a new SIM card/subscription order
+      operationId: createOrderV2
+      requestBody:
+        description: Order details
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - operation_type
+                - sim_type
+                - product
+                - properties
+                - subscriber
+              properties:
+                operation_type:
+                  description: The type of order to be created
+                  type: string
+                  enum:
+                    - ACTIVATION
+                    - TOPUP
+                sim_type:
+                  description: The type of SIM to activate
+                  type: string
+                  enum:
+                    - PSIM
+                    - ESIM
+                country:
+                  description: Country where the order was placed
+                  type: string
+                  format: ISO2 Country Code
+                product:
+                  description: The product that is being asssociated with the SIM
+                  type: object
+                  required:
+                    - id
+                  properties:
+                    id:
+                      description: The product identifier as returned by the products endpoint
+                      type: string
+                    sold_price:
+                      description: Price at which the product was sold to the end customer including VAT
+                      type: number
+                    sold_currency:
+                      description: Currency in which the product was sold to the end customer
+                      type: string
+                      format: ISO3 Currency Format
+                    activation_date:
+                      description: Date when the product should activate (Defaults to now())
+                      type: string
+                subscriber:
+                  description: Information on the subscriber
+                  type: object
+                  properties:
+                    email:
+                      description: Subscriber's email address (Required for ACTIVATION order type)
+                      type: string
+                      format: email
+                    first_name:
+                      description: Subscriber's first name (Required for ACTIVATION order type)
+                      type: string
+                    last_name:
+                      description: Subscriber's last name (Required for ACTIVATION order type)
+                      type: string
+                    country_of_residence:
+                      description: Subsceriber's home country (Required for ACTIVATION order type)
+                      type: string
+                      format: ISO2 Country Code
+                    sim:
+                      description: Identifies the SIM profile to be installed on the device (Required for PSIM sim type and TOPUP order type)
+                      type: object
+                      properties:
+                        iccid:
+                          description: SIM profile identifier
+                          type: string
+                          format: iccid
+            examples:
+              PSIM_ACTIVATION:
+                summary: Physical SIM Activation
+                value:
+                  operation_type: ACTIVATION
+                  sim_type: "PSIM"
+                  country: GB
+                  product:
+                    id: "kn8etk9XBX0gG7pFP5KErXvWVNN4jOERTMVMNEkX-Ak="
+                    sold_price: 20
+                    sold_currency: "EUR"
+                    activation_date: "2020-01-01T00:00:00Z"
+                  subscriber:
+                    email: "john@doe.com"
+                    first_name: "John"
+                    last_name: "Doe"
+                    country_of_residence: "US"
+                    language: "en"
+                    sim:
+                      iccid: "8944472600000510740"
+              PSIM_TOPUP:
+                summary: Physical SIM Topup
+                value:
+                  operation_type: TOPUP
+                  sim_type: "PSIM"
+                  country: GB
+                  product:
+                    id: "kn8etk9XBX0gG7pFP5KErXvWVNN4jOERTMVMNEkX-Ak="
+                    sold_price: 20
+                    sold_currency: "EUR"
+                    activation_date: "2020-01-01T00:00:00Z"
+                  subscriber:
+                    sim:
+                      iccid: "8944472600000510740"
+      responses:
+        201:
+          description: Order created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Order'
+              example:
+                id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                status: 'ACCEPTED'
+
+  /v2/order/{order_id}:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+    get:
+      tags:
+        - Order Management
+      summary: Get order details
+      description: Retrive a specific order's details
+      operationId: getOrderDetailsV2
+      responses:
+        200:
+          description: Order retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderDetailsV2'
+              examples:
+                COMPLETED:
+                  summary: Completed
+                  value:
+                    id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                    status: "COMPLETED"
+                    output:
+                      iccid: "8944000013283712983321"
+                      matching_id: "6C-DA326D-K86D"
+                      subscription_id: "Q-hzHc6EErZPQcgw2L02_nDdruGtr6lDrM-jmja_xuE="
+                    _metadata:
+                      links:
+                        _self: "/v2/orders/6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                        _sim: "/v2/sims/8944000013283712983321"
+                        _subscription: "/v2/subscription/Q-hzHc6EErZPQcgw2L02_nDdruGtr6lDrM-jmja_xuE="
+                        _lpa: "1$rsp.truphone.com$6C-DA326D-K86D"
+                        _qrcode: "https://services.truphone.com/connect/qrcode/v1/esim/LPA:1$rsp.truphone.com$FDSAA-ASD"
+                ACCEPTED:
+                  summary: Accepted (Not in progress yet)
+                  value:
+                    id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                    status: "ACCEPTED"
+                FULFILLING:
+                  summary: Fulfilling (In progress)
+                  value:
+                    id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                    status: "FULFILLING"
+                FAILED:
+                  summary: Failed
+                  value:
+                    id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
+                    status: "FAILED"
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+
+  # SIM Card Management
+
+  ## V1
+
+  /v1/sim:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+    get:
+      tags:
+        - SIM Card Management [v1]
+      summary: Get SIM cards list
+      description: Retrieve the list of SIM profiles already purchased
+      operationId: getSIMProfiles
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        200:
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ResourceResponse'
+              example:
+                - id: "8944478600000000217"
+                  url: '/v1/sim/8944478600000000217'
+                - id: "8944478600000205543"
+                  url: '/v1/sim/8944478600000205543'
+
+  /v1/sim/{iccid}:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/Iccid'
+
+    get:
+      tags:
+        - SIM Card Management [v1]
+      summary: Get SIM profile details
+      description: Retrieve a SIM profile's details
+      operationId: getSIMProfileDetails
+      responses:
+        200:
+          description: SIM profile details retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  iccid:
+                    type: string
+                    format: iccid
+                    description: The SIM profile's identifier
+                    example: '8944478600000000217'
+                  eid:
+                    $ref: '#/components/schemas/Eid'
+                  matching_id:
+                    type: string
+                    description: The RSP activation code used to install the eSIM
+                    example: 5C-IVCRP-QTQRML
+                  lpa_url:
+                    type: string
+                    description: The URL used by the device's LPA to install the eSIM
+                    example: LPA:1$rsp.truphone.com$5C-IVCRP-QTQRML
+                  qrcode_url:
+                    type: string
+                    description: The URL with a QR code that can be used to install the eSIM on a compatible device
+                    example: "https://services.truphone.com/connect/qrcode/v1/esim/LPA:1$rsp.truphone.com$5C-IVCRP-QTQRML"
+                  status:
+                    type: string
+                    enum:
+                      - Released
+                      - Downlaoded
+                      - Installed
+                      - Unavailable
+                    description: The eSIM profile installation status
+                    example: Installed
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+    delete:
+      tags:
+        - SIM Card Management [v1]
+      summary: Delete SIM profile
+      operationId: deleteSIMProfile
+      description: Deletes a SIM profile removing all information associated with it. This operation only works provided the selected SIM is not installed on the device and there are no used subscriptions associated with it. Once the user starts to consume data using any given SIM profile or installed the profile in a device, it will no longer be possible to delete it.
+      responses:
+        204:
+          description: SIM profile deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+      deprecated: false
+
+  /v1/sim/{iccid}/eid:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/Iccid'
+
+    put:
+      tags:
+        - SIM Card Management [v1]
+      summary: Update SIM EID
+      description: Changes the EID this SIM is bound to (eSIM + Apple devices only). Can an should only be used in case the user intends to move an eSIM profile to a different device
+      operationId: upddateSIMEid
+      requestBody:
+        description: The target device's EID
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eid:
+                  $ref: '#/components/schemas/Eid'
+        required: true
+      responses:
+        204:
+          description: SIM profile EID updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+      deprecated: false
+
+
+  /v1/sim/{iccid}/subscriptions:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/Iccid'
+
+    get:
+      tags:
+        - SIM Card Management [v1]
+      summary: Get SIM profile subscription list
+      description: Get the list of subscriptions associated to this SIM profile.
+      operationId: getSimSubscriptions
+      parameters:
+        - name: size
+          in: query
+          required: false
+          schema:
+            maximum: 40
+            minimum: 1
+            type: integer
+            format: int32
+            default: 40
+        - name: page
+          in: query
+          required: false
+          schema:
+            minimum: 1
+            type: integer
+            format: int32
+            default: 1
+      responses:
+        200:
+          description: SIM profile preferences retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+  /v1/sim/{iccid}/preferences:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/Iccid'
+
+    get:
+      tags:
+        - SIM Card Management [v1]
+      summary: Get SIM profile preferences
+      description: Get the list of preferences associated to this SIM profile. Currently only notifications are supported
+      operationId: getSIMProfilePreferences
+      responses:
+        200:
+          description: SIM profile preferences retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  notifications:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/NotificationSetting'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+  /v1/sim/{iccid}/preferences/notifications/{type}:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/Iccid'
+      - name: type
+        in: path
+        description: The notification type
+        schema:
+          type: string
+          enum:
+            - USAGE_THRESHOLD
+            - SUBSCRIPTION_END
+        example: USAGE_THRESHOLD
+        required: true
+
+    post:
+      tags:
+        - SIM Card Management [v1]
+      summary: Add SIM profile notification preference
+      description: Register for receiving SIM profile notifications via webhook of a given notification type
+      operationId: addSIMProfileNotificationPreference
+      requestBody:
+        description: The webhook to be called
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                webhook_url:
+                  type: string
+                  format: url
+                  description: The webhook url to be called
+                  example: 'http://example.com/mywebhook'
+        required: true
+      responses:
+        201:
+          description: SIM profile notification preference added successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+    delete:
+      tags:
+        - SIM Card Management [v1]
+      summary: Delete SIM notification preferences
+      description: Unregister a webhook for a given SIM profile and notification type
+      operationId: deleteSIMNotificationPreferences
+      responses:
+        204:
+          description: SIM profile notification preferences removed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+
+  ## V2
+
+  /v2/sims:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+
+    get:
+      tags:
+        - SIM Card Management
+      summary: Get SIM cards list
+      description: Retrieve the list of SIM cards/profiles already purchased
+      operationId: getSimsV2
+      parameters:
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSizev2'
+      responses:
+        200:
+          description: Sims Retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SimListItemV2'
+              example:
+                data:
+                  - iccid: "8944471111111119506"
+                    _metadata:
+                      links:
+                        _self: "/v2/sims/8944471111111119506"
+                _metadata:
+                  page: 1
+                  page_size: 1
+                  page_count: 1
+                  links:
+                    _prev: "/v2/sims?page=1&page_size=1"
+                    _self: "/v2/sims?page=2&page_size=1"
+                    _next: "/v2/sims?page=3&page_size=1"
+
+  /v2/sims/{iccid}:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+
+    get:
+      tags:
+        - SIM Card Management
+      summary: Get SIM card details
+      description: Get SIM card/profile details by iccid
+      operationId: getSIMDetailsV2
+      parameters:
+        - name: iccid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: SIM retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SimDetailsV2'
+              example:
+                iccid: "8944471111111119506"
+                status: "Released"
+                matching_id: "5C-ZYXZZ-1R54O94"
+                last_modified: "2020-12-03T08:56:00Z"
+                _metadata:
+                  links:
+                    _lpa: "LPA:1$rsp.truphone.com$5C-ZYXZZ-1R54O94"
+                    _subscriptions: "/v2/subscriptions?iccid=8944478600000213141"
+                    _qrcode: "http://services.truphone.com/qrcode/v1/esim/LPA:1$rsp.truphone.com$5C-ZYXFC-1R5MO94"
+                    _self: "/v2/sims/8944471111111119506"
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+    delete:
+      tags:
+        - SIM Card Management
+      summary: Delete SIM
+      operationId: deleteSIMV2
+      description: Deletes a SIM profile removing all information associated with it. This operation only works provided the selected SIM is not installed on the device and there are no used subscriptions associated with it. Once the user starts to consume data using any given SIM profile or installed the profile in a device, it will no longer be possible to delete it.
+      parameters:
+        - name: iccid
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        204:
+          description: SIM profile deleted successfully
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+  /v2/sims/{iccid}/eid:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/Iccid'
+
+    put:
+      tags:
+        - SIM Card Management
+      summary: Update SIM EID
+      description: Changes the EID this SIM is bound to (eSIM + Apple devices only). Can an should only be used in case the user intends to move an eSIM profile to a different device
+      operationId: upddateSIMEidV2
+      requestBody:
+        description: The target device's EID
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                eid:
+                  $ref: '#/components/schemas/Eid'
+        required: true
+      responses:
+        204:
+          description: SIM profile EID updated successfully
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+  /v2/sims/{iccid}/notifications:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+
+    get:
+      tags:
+        - SIM Card Management
+      summary: Get SIM notifications
+      description: Retrieve the list of active notifications for this SIM
+      operationId: getSimNotificationsV2
+      parameters:
+        - name: iccid
+          in: path
+          required: true
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: SIM Notifications retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SIMNotificationListItemV2'
+              example:
+                data:
+                  - type: "USAGE_THRESHOLD"
+                    webhook: 'http://example.com/mywebhook'
+                    _metadata:
+                      links:
+                        self: "/v2/sims/8944478600000000217/notifications/USAGE_THRESHOLD"
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+  /v2/sims/{iccid}/notifications/{type}:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/Iccid'
+      - name: type
+        in: path
+        description: The notification type
+        schema:
+          type: string
+          enum:
+            - USAGE_THRESHOLD
+            - SUBSCRIPTION_END
+        example: USAGE_THRESHOLD
+        required: true
+
+    put:
+      tags:
+        - SIM Card Management
+      summary: Subscribe to notification type
+      description: Register for receiving SIM profile notifications via webhook of a given notification type
+      operationId: addSIMProfileNotificationPreferencev2
+      requestBody:
+        description: The webhook to be called
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                webhook_url:
+                  type: string
+                  format: url
+                  description: The webhook url to be called
+                  example: 'http://example.com/mywebhook'
+        required: true
+      responses:
+        204:
+          description: SIM notification subscribed successfully
+          content:
+            application/json:
+              schema:
+                type: object
+          404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+    delete:
+      tags:
+        - SIM Card Management
+      summary: Unsubscribe from notification type
+      description: Unsubscribe from a given SIM notification type
+      operationId: deleteSIMNotificationV2
+      responses:
+        204:
+          description: SIM notification unsibscriberd successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+  # Subscription Management
+
+  ## V1
+
+  /v1/subscription:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+    get:
+      tags:
+        - Subscription Management [v1]
+      summary: Get subscriptions
+      description: Retrieve the list of already purchased subscriptions
+      operationId: getSubscriptions
+      parameters:
+        - name: after
+          in: query
+          description: Only retrieve subscriptions purchased after this date
+          schema:
+            type: string
+            format: date-time
+            example: '2020-04-27T00:00:00.002Z'
+        - name: before
+          in: query
+          description: Only retrieve subscriptions purchased before this date
+          schema:
+            type: string
+            format: date-time
+            example: '2020-04-27T00:00:00.002Z'
+        - name: email
+          in: query
+          description: Only retrieve subscriptions purchased for a given subscriber
+          schema:
+            type: string
+            format: email
+            example: john.doe@truphone.com
+        - name: iccid
+          in: query
+          description: Only retrieve subscriptions purchased for a given iccid
+          schema:
+            type: string
+            format: iccid
+            example: '8944478600000213091'
+        - name: product-id
+          in: query
+          description: Only retrieve subscriptions purchased for a given product id
+          schema:
+            type: string
+            example: 'Q-hzHc6EErZPQcgw2L02_nDdruGtr6lDrM-jmja_xuE='
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        200:
+          description: Subscriptions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+
+  /v1/subscription/{subscriptionId}:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/SubscriptionId'
+
+    get:
+      tags:
+        - Subscription Management [v1]
+      summary: Get subscription details
+      description: Retrieve a specific subscription's details
+      operationId: getSubscriptionDetails
+      responses:
+        200:
+          description: Subscription details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subscription'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+      deprecated: false
+
+  /v1/subscription/{subscriptionId}/activate:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/SubscriptionId'
+
+    post:
+      tags:
+        - Subscription Management [v1]
+      summary: Activate subscription
+      description: Activate a subscription that was created with an activation date in the future. The subscription becomes active immediately
+      operationId: activateSubscription
+      responses:
+        204:
+          description: Subscription activated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+  ## V2
+
+  /v2/subscriptions:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+
+    get:
+      tags:
+        - Subscription Management
+      summary: Get subscriptions list
+      description: Retrieve the list of subscriptions already purchased
+      operationId: getSubscriptionsV2
+      parameters:
+        - name: email
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: iccid
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: product-id
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: before
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+        - name: after
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date-time
+
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSizev2'
+      responses:
+        '200':
+          description: Subscriptions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SubscriptionListItemV2'
+              example:
+                data:
+                  - id: "__bPIjtY8e5xdjn36DwUCwslKkZABh1D2HzyaZdpdTg="
+                    name: "5GB 30-Day Data Bundle"
+                    sim_id: "8944477100000000086"
+                    created_date: "2020-12-04T17:20:38Z"
+                    status: ACTIVE
+                    spend_balance: "0"
+                    initial_balance: "1073741824"
+                    current_balance: "1073741824"
+                    balance_units: "Bytes"
+                    _metadata:
+                      links:
+                        _self: "/v2/subscriptions/__bPIjtY8e5xdjn36DwUCwslKkZABh1D2HzyaZdpdTg="
+                _metadata:
+                  page: 1
+                  page_size: 1
+                  page_count: 1
+                  links:
+                    _prev: "/v2/subscriptions?page=1&page_size=1"
+                    _self: "/v2/subscriptions?page=2&page_size=1"
+                    _next: "/v2/subscriptions?page=3&page_size=1"
+
+  /v2/subscriptions/{subscription-id}:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/SubscriptionId'
+
+    get:
+      tags:
+        - Subscription Management
+      summary: Get subscription details
+      description: Retrieve the subscription details
+      operationId: getSubscriptionDetailsV2
+      responses:
+        200:
+          description: Subscription retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SubscriptionDetailsV2'
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+  /v2/subscriptions/{subscription-id}/activate:
+    parameters:
+      - $ref: '#/components/parameters/CorrelationId'
+      - $ref: '#/components/parameters/SubscriptionId'
+
+    put:
+      tags:
+        - Subscription Management
+      summary: Activate subscription
+      description: Activates a given subscription by setting the activation date to now
+      operationId: activateSubscriptionV2
+      responses:
+        204:
+          description: Subscription successfully activated
+          content:
+            application/json:
+              schema:
+                type: object
+        404:
+          $ref: '#/components/responses/ResourceNotFound'
+
+
+
+
+
+components:
+
+  parameters:
+
+    CorrelationId:
+      name: X-Correlation-Id
+      in: header
+      description: A unique identifier that can be used to track requests across applications
+      schema:
+        type: string
+        format: uuid
+        default: <random generated uuid>
+
+    Page:
+      name: page
+      in: query
+      description: The page to retrieve
+      schema:
+        type: integer
+        format: int32
+        default: 1
+
+    PageSize:
+      name: size
+      in: query
+      description: The maximum number of items to retrieve
+      schema:
+        type: integer
+        format: int32
+        default: 40
+
+    PageSizev2:
+      name: page_size
+      in: query
+      description: The maximum number of items to retrieve
+      schema:
+        type: integer
+        format: int32
+        default: 40
+
+
+
+    Iccid:
+      name: iccid
+      in: path
+      description: The SIM profile's ICCID
+      required: true
+      schema:
+        type: string
+
+    SubscriptionId:
+      name: subscription_id
+      in: path
+      description: The subscription identifier
+      required: true
+      schema:
+        type: string
+
+  responses:
+
+    ResourceNotFound:
+      description: The requested resource was not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              type:
+                type: string
+                example: "RESOURCE_NOT_FOUND"
+              messages:
+                type: array
+                items:
+                  type: string
+                  example: "Resource with identifier X was not found"
+
+  schemas:
+
+    # Product Catalogue
+
+    ## V1
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          example: SaLjq5bqP8rsY5k8VVQtFs_punENj1R8ima-M3DQTjg=
+        name:
+          type: string
+          example: My awesome connectivity product
+        description:
+          type: string
+          example: A more detailed description of my product
+        period:
+          type: number
+          example: 365
+        period_unit:
+          type: string
+          example: "DAYS"
+        data:
+          type: object
+          properties:
+            value:
+              type: number
+              example: 10
+            units:
+              type: string
+              enum:
+                - MB
+                - GB
+                - KB
+              example: MB
+        footprint:
+          type: array
+          items:
+            type: string
+          example:
+            - US
+            - GB
+            - PT
+        activeCountries:
+          type: array
+          items:
+            type: string
+          example:
+            - ALL
+        pricing:
+          type: object
+          example:
+            EUR: 10
+        region:
+          type: string
+          example: global
+
+    ## V2
+
+    ProductListItemV2:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        sim_type:
+          type: array
+          items:
+            type: string
+        duration:
+          type: number
+        duration_unit:
+          type: string
+        data:
+          type: number
+        footprint_code:
+          type: string
+        data_unit:
+          type: string
+          enum:
+            - MB
+            - GB
+            - KB
+        price:
+          type: number
+        price_currency:
+          type: string
+
+    ProductDetailsV2:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        sim_type:
+          type: array
+          items:
+            type: string
+        duration:
+          type: number
+        duration_unit:
+          type: string
+        data:
+          type: number
+        data_unit:
+          type: string
+          enum:
+            - MB
+            - GB
+            - KB
+        footprint:
+          type: array
+          items:
+            type: string
+        footprint_code:
+          type: string
+        price:
+          type: number
+        price_currency:
+          type: string
+
+    # Order Management
+
+    ## V1
+
+    Order:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The created order id
+          example: '30927200-19dd-412a-bf05-b50682b88f03'
+        status:
+          type: string
+          enum:
+            - ACCEPTED
+            - FULFILLING
+            - COMPLETED
+            - FAILED
+          description: The order's status
+        matching_id:
+          type: string
+        iccid:
+          type: string
+        lpa_url:
+          type: string
+        qrcode_url:
+          type: string
+        subscription_id:
+          type: string
+
+    ## V2
+
+    OrderListItemV2:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The created order id
+          example: '30927200-19dd-412a-bf05-b50682b88f03'
+        status:
+          type: string
+          enum:
+            - ACCEPTED
+            - FULFILLING
+            - COMPLETED
+            - FAILED
+          description: The order's status
+        created_date:
+          type: string
+          description: The date when the subscription was originally purchased
+          example: '2020-11-16T19:05:05Z'
+        output:
+          type: object
+          properties:
+            matching_id:
+              type: string
+              example: "6C-DA326D-K86D"
+            iccid:
+              type: string
+              example: "8944000013283712983321"
+            subscription_id:
+              type: string
+              example: "Q-hzHc6EErZPQcgw2L02_nDdruGtr6lDrM-jmja_xuE="
+
+
+    OrderDetailsV2:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: The created order id
+          example: '30927200-19dd-412a-bf05-b50682b88f03'
+        status:
+          type: string
+          enum:
+            - ACCEPTED
+            - FULFILLING
+            - COMPLETED
+            - FAILED
+          description: The order's status
+        created_date:
+          type: string
+          description: The date when the subscription was originally purchased
+          example: '2020-11-16T19:05:05Z'
+        output:
+          type: object
+          properties:
+            matching_id:
+              type: string
+            iccid:
+              type: string
+            subscription_id:
+              type: string
+
+    # SIM management
+
+    ## V1
+
+    ResourceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        url:
+          type: string
+
+    Eid:
+      type: string
+      format: eid
+      description: The device's EID (eUICC)
+      example: '89049032004008882600019002594762'
+
+    NotificationSetting:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - USAGE_THRESHOLD
+            - SUBSCRIPTION_END
+          description: The notification type
+          example: USAGE_THRESHOLD
+        webhook_url:
+          type: string
+          description: The url to be called when the notification triggers
+
+    ## V2
+
+    SimListItemV2:
+      type: object
+      properties:
+        iccid:
+          type: string
+          description: The SIM identifier
+
+    SimDetailsV2:
+      type: object
+      properties:
+        iccid:
+          type: string
+          description: The SIM identifier
+        status:
+          type: string
+          enum:
+            - Released
+            - Installed
+            - Unavailable
+            - Downloaded
+          description: The profile install status (eSIM only)
+        matching_id:
+          type: string
+          description: The profile activation code (eSIM only)
+        last_modified:
+          type: string
+          format: ISO-8601 Date
+          description: Date of the last eUICC operation affecting this profile (eSIM only)
+
+    SIMNotificationListItemV2:
+      type: object
+      properties:
+        type:
+          type: string
+          enum:
+            - SUBSCRIPTION_END
+            - USAGE_THRESHOLD
+          description: The notification type
+        webhook:
+          type: string
+          description: The webhook url to call when the notification triggers
+
+    # Subscripion management
+
+    ## V1
+
+    Subscription:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The subscription identifier
+          example: SaLjq5bqP8rsY5k8VVQtFs_punENj1R8ima-M3DQTjg=
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - EXPIRED
+            - PENDING
+            - DEPLETED
+          description: The current subscription status
+          example: ACTIVE
+        initialBalance:
+          type: string
+          description: The subscription initial data allowance in bytes
+          example: '1073741824'
+        spentBalance:
+          type: string
+          description: The subscription used data amount in bytes
+          example: '1024'
+        activationDate:
+          type: string
+          description: The date when the subscription was/will activate
+          example: '2020-10-16T19:05:05Z'
+        expirationDate:
+          type: string
+          description: The date when the subscription was/will expire
+          example: '2020-11-16T19:05:05Z'
+        createdDate:
+          type: string
+          description: The date when the subscription was originally purchased
+          example: '2020-11-16T19:05:05Z'
+
+        product:
+          $ref: '#/components/schemas/Product'
+        iccid:
+          type: string
+          description: The SIM profile iccid associated to this subscription
+          example: '8944478600000213091'
+        device_id:
+          type: string
+          description: The id of the device provided by the user at purchase time
+          example: '123456'
+
+
+    ## V2
+
+    SubscriptionDetailsV2:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The subscription identifier
+          example: SaLjq5bqP8rsY5k8VVQtFs_punENj1R8ima-M3DQTjg=
+
+        name:
+          type: string
+          description: Name of the subscription
+          example: Subscription Name
+        sim_id:
+          type: string
+          description: The sim id
+          example: "123223123"
+        device_id:
+          type: string
+          description: The id of the device provided by the user at purchase time
+        product_id:
+          type: string
+          description: The id of the product assosciated to this subscription
+          example: '123423123213'
+        created_date:
+          type: string
+          description: The date when the subscription was originally purchased
+        activation_date:
+          type: string
+          description: The date when the subscription was/will activate
+        expiry_date:
+          type: string
+          description: The date when the subscription was/will expire
+          example: '2020-11-16T19:05:05Z'
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - EXPIRED
+            - PENDING
+            - DEPLETED
+          description: The current subscription status
+          example: ACTIVE
+        initial_balance:
+          type: string
+          description: The subscription initial data allowance
+          example: '1073741824'
+        current_balance:
+          type: string
+          description: The subscription available data amount
+          example: '1073741824'
+        balance_units:
+          type: string
+          example: Bytes
+          description: The balance unit
+
+
+        spent_balance:
+          type: string
+          example: "0"
+          description: The subscription spent data amount
+
+        _metadata:
+          type: object
+          description: URLs to other subscription related resources
+          properties:
+            links:
+              type: object
+              properties:
+                _activate:
+                  type: string
+                  example: "/v2/subscriptions/TRsi2kCAR2_m-lNYRMgwfiu36T8GUqPbyGzjAu6vc5c=/activate"
+                _sim:
+                  type: string
+                  example: "/v2/sims/123223123"
+                _self:
+                  type: string
+                  example: "/v2/subscriptions/SaLjq5bqP8rsY5k8VVQtFs_punENj1R8ima-M3DQTjg="
+                _product:
+                  type: string
+                  example: "/v2/products/123423123213"
+
+
+    SubscriptionListItemV2:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The subscription identifier
+        name:
+          type: string
+          description: Name of the subscription
+        sim_id:
+          type: string
+          description: The sim id
+        created_date:
+          type: string
+          description: The date when the subscription was originally purchased
+        initial_balance:
+          type: string
+          description: The subscription initial data allowance
+          example: '1073741824'
+        current_balance:
+          type: string
+          description: The subscription available data amount
+        balance_units:
+          type: string
+          description: The balance unit
+        spent_balance:
+          type: string
+          description: The subscription spent data amount
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - EXPIRED
+            - PENDING
+            - DEPLETED
+        _metadata:
+          type: object
+          description: URLs to the subscription details
+
+
+

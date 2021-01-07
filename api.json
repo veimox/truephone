@@ -1,0 +1,8 @@
+{
+    "npmName": "truephone",
+    "npmDescription": "Typescript interface for the Truephone API",
+    "npmVersion": "1.0.0",
+    "snapshot": false,
+    "supportsES6": true,
+    "modelPropertyNaming": "original"
+}
