@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - run: npm install
+      - run: npm install --only=dev
       - run: npm run api
       - uses: JS-DevTools/npm-publish@v1
         with:
