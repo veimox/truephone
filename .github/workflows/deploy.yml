@@ -13,5 +13,5 @@ jobs:
       - run: npm run api
       - uses: JS-DevTools/npm-publish@v1
         with:
-          package: "gen/api/package.json"
+          package: "gen/package.json"
           token: ${{ secrets.NPM_TOKEN }}

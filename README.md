@@ -1,6 +1,8 @@
-# Truephone TS lib
+# Truphone TS lib
 
-This package contains a TS library for the [Truephone API v2](https://docs.connect.truphone.com/apireference)
+This package build a TS library for the [Truphone API v2](https://docs.connect.truphone.com/apireference).
+
+It makes use of `openapi-generator-cli` to generate a TS client that is bundled [as a npm module](https://www.npmjs.com/package/truphone)
 
 ## How to build
 ```bash
@@ -14,20 +16,6 @@ npm version <patch/minor/major>
 ```
 The package will be deployed by the CI on every tag made
 
-## How to use it
-
-```ts
-import { SIMCardManagementApi } from 'truephone'
-
-let simApi = new SIMCardManagementApi();
-let orderApi = new OrderManagementApi();
-let productApi = new ProductCatalogueApi();
-let subApi = new SubscriptionManagementApi();
-
-simApi.getSimsV2().then(/*useme*/)
-
-```
-
 ## References
 * [How to create credentials](https://docs.connect.truphone.com/docs/authentication)
-* [Truephone API v2](https://docs.connect.truphone.com/apireference)
+* [Truphone API v2](https://docs.connect.truphone.com/apireference)
