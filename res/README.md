@@ -2,11 +2,11 @@
 
 This package contains a TS library for the [Truphone API v2](https://docs.connect.truphone.com/apireference).
 
-This package is built automatically from the project [truephone-openapi](https://github.com/veimox/truephone-openapi).
+This package is built automatically from the project [truphone-openapi](https://github.com/veimox/truphone-openapi).
 
 ## How to build
 ```bash
-npm install truephone
+npm install truphone
 
 ## How to use it
 
