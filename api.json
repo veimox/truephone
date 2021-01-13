@@ -2,7 +2,7 @@
     "npmName": "truphone",
     "npmRepository": "",
     "npmDescription": "Typescript interface for the Truphone API",
-    "npmVersion": "1.0.1",
+    "npmVersion": "1.0.2",
     "snapshot": false,
     "supportsES6": true,
     "modelPropertyNaming": "original"
