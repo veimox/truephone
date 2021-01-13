@@ -2,7 +2,7 @@ openapi: 3.0.1
 info:
   title: Truphone Connect API
   description: Truphone\'s connectivity API to manage order, activation, and management of SIMs and subscribers
-  version: 2.0
+  version: "2.0"
 tags:
 
   - name: Product Catalogue [v1]
@@ -277,7 +277,7 @@ paths:
             schema:
               type: object
               required:
-                -input
+                - input
               properties:
                 input:
                   description: The input object that contains the parameters to create the order
@@ -1427,10 +1427,15 @@ paths:
           $ref: '#/components/responses/ResourceNotFound'
 
 
-
-
+security:
+  - bearerAuth: []
 
 components:
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
 
   parameters:
 
