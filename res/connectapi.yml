@@ -1381,11 +1381,16 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - data
+                  - _metadata
                 properties:
                   data:
                     type: array
                     items:
                       $ref: '#/components/schemas/SubscriptionListItemV2'
+                  _metadata:
+                    $ref: '#/components/schemas/PaginationMetadata'
               example:
                 data:
                   - id: "__bPIjtY8e5xdjn36DwUCwslKkZABh1D2HzyaZdpdTg="
@@ -1969,12 +1974,26 @@ components:
 
     SubscriptionDetailsV2:
       type: object
+      required:
+        - id
+        - name
+        - sim_id
+        - device_id
+        - product_id
+        - created_date
+        - activation_date
+        - expiry_date
+        - status
+        - initial_balance
+        - current_balance
+        - balance_units
+        - spent_balance
+        - _metadata
       properties:
         id:
           type: string
           description: The subscription identifier
           example: SaLjq5bqP8rsY5k8VVQtFs_punENj1R8ima-M3DQTjg=
-
         name:
           type: string
           description: Name of the subscription
@@ -2021,13 +2040,10 @@ components:
           type: string
           example: Bytes
           description: The balance unit
-
-
         spent_balance:
           type: string
           example: "0"
           description: The subscription spent data amount
-
         _metadata:
           type: object
           description: URLs to other subscription related resources
@@ -2051,6 +2067,18 @@ components:
 
     SubscriptionListItemV2:
       type: object
+      required:
+        - id
+        - name
+        - sim_id
+        - created_date
+        - created_date
+        - initial_balance
+        - current_balance
+        - balance_units
+        - spent_balance
+        - status
+        - _metadata
       properties:
         id:
           type: string
