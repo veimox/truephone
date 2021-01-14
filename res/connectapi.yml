@@ -124,9 +124,17 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/ProductListItemV2'
+                type: object
+                required:
+                  - data
+                  - _metadata
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ProductListItemV2'
+                  _metadata:
+                    $ref: '#/components/schemas/PaginationMetadata'
               example:
                 data:
                   - id: "wp-_bXkuC26SFDSRMHyiAQK7LJ6MtiWyr3zLfwB7FM="
@@ -519,9 +527,17 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/OrderListItemV2'
+                type: object
+                required:
+                  - data
+                  - _metadata
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/OrderListItemV2'
+                  _metadata:
+                    $ref: '#/components/schemas/PaginationMetadata'
               example:
                 data:
                   - id: "6d41c4ff-1877-4d13-82b0-7dad02c4b02a"
@@ -562,6 +578,7 @@ paths:
               required:
                 - operation_type
                 - sim_type
+                - country
                 - product
                 - properties
                 - subscriber
@@ -1004,9 +1021,17 @@ paths:
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/SimListItemV2'
+                type: object
+                required:
+                  - data
+                  - _metadata
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/SimListItemV2'
+                  _metadata:
+                    $ref: '#/components/schemas/PaginationMetadata'
               example:
                 data:
                   - iccid: "8944471111111119506"
@@ -1475,7 +1500,14 @@ components:
         format: int32
         default: 40
 
-
+    PageCount:
+      name: page_count
+      in: query
+      description: The numer of pages retrieved
+      schema:
+        type: integer
+        format: int32
+        default: 5
 
     Iccid:
       name: iccid
@@ -1512,6 +1544,28 @@ components:
                   example: "Resource with identifier X was not found"
 
   schemas:
+
+    # Common
+
+    PaginationMetadata:
+      type: object
+      required:
+        - page
+        - page_size
+        - page_count
+      properties:
+        page:
+          description: Current page
+          type: number
+          example: 1
+        page_size:
+          description: Pagination size
+          type: number
+          example: 5
+        page_count:
+          description: The total number of pages
+          type: number
+          example: 10
 
     # Product Catalogue
 
@@ -1574,6 +1628,18 @@ components:
 
     ProductListItemV2:
       type: object
+      required:
+        - id
+        - name
+        - sim_type
+        - duration
+        - duration_unit
+        - data
+        - data_unit
+        - footprint
+        - footprint_code
+        - price
+        - price_currency
       properties:
         id:
           type: string
@@ -1604,6 +1670,18 @@ components:
 
     ProductDetailsV2:
       type: object
+      required:
+        - id
+        - name
+        - sim_type
+        - duration
+        - duration_unit
+        - data
+        - data_unit
+        - footprint
+        - footprint_code
+        - price
+        - price_currency
       properties:
         id:
           type: string
@@ -1671,6 +1749,11 @@ components:
 
     OrderListItemV2:
       type: object
+      required:
+        - id
+        - status
+        - created_date
+        - output
       properties:
         id:
           type: string
@@ -1691,6 +1774,10 @@ components:
           example: '2020-11-16T19:05:05Z'
         output:
           type: object
+          required:
+            - matching_id
+            - iccid
+            - subscription_id
           properties:
             matching_id:
               type: string
@@ -1705,6 +1792,11 @@ components:
 
     OrderDetailsV2:
       type: object
+      required:
+        - id
+        - status
+        - created_date
+        - output
       properties:
         id:
           type: string
@@ -1725,6 +1817,10 @@ components:
           example: '2020-11-16T19:05:05Z'
         output:
           type: object
+          required:
+            - matching_id
+            - iccid
+            - subscription_id
           properties:
             matching_id:
               type: string
@@ -1769,6 +1865,8 @@ components:
 
     SimListItemV2:
       type: object
+      required:
+        - iccid
       properties:
         iccid:
           type: string
@@ -1776,6 +1874,11 @@ components:
 
     SimDetailsV2:
       type: object
+      required:
+        - iccid
+        - status
+        - matching_id
+        - last_modified
       properties:
         iccid:
           type: string
