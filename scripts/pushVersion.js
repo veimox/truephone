@@ -9,15 +9,15 @@ const rl = readline.createInterface({
 let packageInfo = require('../package.json');
 let version = packageInfo.version;
 
-rl.question('Shall we push it? [y/N]', function(name) {
+rl.question('Shall we push it? [y/N]', function (name) {
     if (name === 'y') {
         const pushTag = spawn('git', [
             'push',
             'origin',
-            'master',
+            'main',
             version
         ]);
-        pushTag.on('close', function(code) {
+        pushTag.on('close', function (code) {
             console.log('Pushed!');
         });
     }
