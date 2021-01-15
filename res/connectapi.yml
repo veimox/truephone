@@ -698,6 +698,13 @@ paths:
       summary: Get order details
       description: Retrive a specific order's details
       operationId: getOrderDetailsV2
+      parameters:
+        - name: order-id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         200:
           description: Order retrieved successfully
